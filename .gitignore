@@ -1,0 +1,4 @@
+.DS_Store
+/libraries
+/sketch/board.h
+*.code-workspace
