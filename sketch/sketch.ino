@@ -1,23 +1,18 @@
-// Bounce2 - Version: Latest
-// GitHub: https://github.com/thomasfredericks/Bounce2
-#include <Bounce2.h>
 
-// MIDIUSB - Version: Latest
-// GitHub: https://github.com/arduino-libraries/MIDIUSB
-#include <MIDIUSB.h>
-//#include <MIDIUSB_Defs.h>
-//#include <frequencyToNote.h>
-//#include <pitchToFrequency.h>
-//#include <pitchToNote.h>
+/**
+ * Main
+ */
 
 #include "sketch.h"
 
-
-Bounce *dis = new Bounce[DI_NUM];
-bool disState[DI_NUM];
-byte aisState[AI_NUM];
+Bounce *dis = new Bounce[DIP_NUM];
+bool disState[DIP_NUM];
+byte aisState[AIP_NUM];
 
 void setup() {
+	initEncoder(CHP_NUM, CH_PINS);
+	MIDI_CH += getEncoded(CHP_NUM, CH_PINS);
+
 	initDOs();
 	initDIs();
 	initAIs();
@@ -28,8 +23,14 @@ void loop() {
 	processAIs();
 }
 
+void initEncoder(int num, const uint8_t pins[]) {
+	for (int i = 0; i < num; i++) {
+		pinMode(pins[i], INPUT_PULLUP);
+	}
+}
+
 void initDOs() {
-	for (int i = 0; i < DO_NUM; i++) {
+	for (int i = 0; i < DOP_NUM; i++) {
 		// Init digital output pins:
 		pinMode(DO_PINS[i], OUTPUT);
 
@@ -39,7 +40,7 @@ void initDOs() {
 }
 
 void initDIs() {
-	for (int i = 0; i < DI_NUM; i++) {
+	for (int i = 0; i < DIP_NUM; i++) {
 		// Setup digital input pins debounce:
 		dis[i].attach(DI_PINS[i], INPUT_PULLUP);
 		dis[i].interval(DEBOUNCE_MSEC);
@@ -57,7 +58,7 @@ void initDIs() {
 }
 
 void initAIs() {
-	for (int i = 0; i < AI_NUM; i++) {
+	for (int i = 0; i < AIP_NUM; i++) {
 		// Init analog input pins:
 		pinMode(AI_PINS[i], INPUT);
 
@@ -70,7 +71,7 @@ void initAIs() {
 }
 
 void processDIs() {
-	for (int i = 0; i < DI_NUM; i++) {
+	for (int i = 0; i < DIP_NUM; i++) {
 		// Update input:
 		dis[i].update();
 
@@ -91,7 +92,7 @@ void processDIs() {
 }
 
 void processAIs() {
-	for (int i = 0; i < AI_NUM; i++) {
+	for (int i = 0; i < AIP_NUM; i++) {
 		byte value = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
 
 		if (aisState[i] != value) {
@@ -115,4 +116,12 @@ void handleDIChange(int idx) {
 void handleAIChange(int idx) {
 	// Send CC:
 	ccValue(AI_CC[idx], aisState[idx]);
+}
+
+byte getEncoded(int num, const uint8_t pins[]) {
+	byte result = 0;
+	for (int i = 0; i < num; i++) {
+		result = result << 1 | !digitalRead(pins[i]);
+	}
+	return result;
 }
