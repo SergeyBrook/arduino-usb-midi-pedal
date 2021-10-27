@@ -55,13 +55,12 @@ static const byte DI_CC_BANKS[CBS_NUM][DIP_NUM] = {
 };
 
 // Analog Input pins:
-static const uint8_t AI_PINS[AIP_NUM] = {A0, A1, A2, A3, A4, A5};
+static const uint8_t AI_PINS[AIP_NUM] = {A0, A1, A2, A3};
 // Analog Input CC Banks:
 static const byte AI_CC_BANKS[CBS_NUM][AIP_NUM] = {
 	// MIDI CC list: https://www.presetpatch.com/midi-cc-list.aspx
 	{46, 47, 48, 49},
-	{50, 51, 52, 53},
-	{54, 55, 56, 57},
+	{52, 53, 54, 55},
 	{58, 59, 60, 61},
-	{62, 63, 84, 85}
+	{84, 85, 86, 87}
 };
