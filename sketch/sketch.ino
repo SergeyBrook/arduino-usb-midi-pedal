@@ -1,37 +1,59 @@
-
 /**
  * Main
  */
 
 #include "sketch.h"
 
-Bounce *dis = new Bounce[DIP_NUM];
-bool disState[DIP_NUM];
-byte aisState[AIP_NUM];
 
+// Digital input pins debounce:
+Bounce *dis = new Bounce[DIP_NUM];
+
+/**
+ * Main init.
+ */
 void setup() {
+	// Init Serial port - used for debug output if enabled:
+	Serial.begin(115200);
+	while (!Serial) {}
+
+	// Init MIDI Channel:
 	initEncoder(CHP_NUM, CH_PINS);
 	MIDI_CH += getEncoded(CHP_NUM, CH_PINS);
 
+	// Init CC Bank:
+	initEncoder(CBP_NUM, CB_PINS);
+	CC_BANK += getEncoded(CBP_NUM, CB_PINS);
+
+	// Init I/O:
 	initDOs();
 	initDIs();
 	initAIs();
 }
 
+/**
+ * Main loop.
+ */
 void loop() {
+	// Process inputs:
 	processDIs();
 	processAIs();
 }
 
+/**
+ * Init encoder pins.
+ */
 void initEncoder(int num, const uint8_t pins[]) {
 	for (int i = 0; i < num; i++) {
 		pinMode(pins[i], INPUT_PULLUP);
 	}
 }
 
+/**
+ * Init Digital Output pins.
+ */
 void initDOs() {
 	for (int i = 0; i < DOP_NUM; i++) {
-		// Init digital output pins:
+		// Init Digital Output pins:
 		pinMode(DO_PINS[i], OUTPUT);
 
 		// Set output (LED):
@@ -39,17 +61,20 @@ void initDOs() {
 	}
 }
 
+/**
+ * Init Digital Input pins with Debounce.
+ */
 void initDIs() {
 	for (int i = 0; i < DIP_NUM; i++) {
-		// Setup digital input pins debounce:
+		// Setup Digital Input pins Debounce:
 		dis[i].attach(DI_PINS[i], INPUT_PULLUP);
 		dis[i].interval(DEBOUNCE_MSEC);
 
-		// Init digital input pins state:
+		// Init Digital Input pins state:
 		if (IS_LATCH[i]) {
-			disState[i] = (digitalRead(DI_PINS[i]) == LOW);
+			DIS_STATE[i] = (digitalRead(DI_PINS[i]) == LOW);
 		} else {
-			disState[i] = false;
+			DIS_STATE[i] = false;
 		}
 
 		// Handle state change:
@@ -57,19 +82,25 @@ void initDIs() {
 	}
 }
 
+/**
+ * Init Analog Input pins.
+ */
 void initAIs() {
 	for (int i = 0; i < AIP_NUM; i++) {
-		// Init analog input pins:
+		// Init Analog Input pins:
 		pinMode(AI_PINS[i], INPUT);
 
-		// Init analog input pins state:
-		aisState[i] = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
+		// Init Analog Input pins state:
+		AIS_STATE[i] = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
 
 		// Handle state change:
 		handleAIChange(i);
 	}
 }
 
+/**
+ * Process Digital Input pins.
+ */
 void processDIs() {
 	for (int i = 0; i < DIP_NUM; i++) {
 		// Update input:
@@ -77,13 +108,13 @@ void processDIs() {
 
 		if (IS_LATCH[i] && dis[i].changed()) {
 			// Update state:
-			disState[i] = (digitalRead(DI_PINS[i]) == LOW);
+			DIS_STATE[i] = (digitalRead(DI_PINS[i]) == LOW);
 
 			// Handle state change:
 			handleDIChange(i);
 		} else if (!IS_LATCH[i] && dis[i].fell()) {
 			// Update state:
-			disState[i] = !disState[i];
+			DIS_STATE[i] = !DIS_STATE[i];
 
 			// Handle state change:
 			handleDIChange(i);
@@ -91,13 +122,16 @@ void processDIs() {
 	}
 }
 
+/**
+ * Process Analog Input pins.
+ */
 void processAIs() {
 	for (int i = 0; i < AIP_NUM; i++) {
 		byte value = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
 
-		if (aisState[i] != value) {
+		if (AIS_STATE[i] != value) {
 			// Update state:
-			aisState[i] = value;
+			AIS_STATE[i] = value;
 
 			// Handle state change:
 			handleAIChange(i);
@@ -105,19 +139,28 @@ void processAIs() {
 	}
 }
 
+/**
+ * Handle Digital Input pin change.
+ */
 void handleDIChange(int idx) {
-	// Send CC:
-	ccState(DI_CC[idx], disState[idx]);
+	// Send CC message:
+	ccState(DI_CC_BANKS[CC_BANK][idx], DIS_STATE[idx]);
 
 	// Update output (LED):
-	digitalWrite(DO_PINS[idx], disState[idx] ? HIGH : LOW);
+	digitalWrite(DO_PINS[idx], DIS_STATE[idx] ? HIGH : LOW);
 }
 
+/**
+ * Handle Analog Input pin change.
+ */
 void handleAIChange(int idx) {
-	// Send CC:
-	ccValue(AI_CC[idx], aisState[idx]);
+	// Send CC message:
+	ccValue(AI_CC_BANKS[CC_BANK][idx], AIS_STATE[idx]);
 }
 
+/**
+ * Read value from encoder pins.
+ */
 byte getEncoded(int num, const uint8_t pins[]) {
 	byte result = 0;
 	for (int i = 0; i < num; i++) {
