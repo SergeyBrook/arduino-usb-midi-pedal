@@ -10,14 +10,12 @@
 //#include <pitchToFrequency.h>
 //#include <pitchToNote.h>
 
-
-// MIDI message MIN and MAX values:
-#define MIDI_MIN 0
-#define MIDI_MAX 127
+// MIDI message resolution (in bits):
+#define MIDI_RES 7
 
 // MIDI message ON and OFF values:
-#define MIDI_OFF MIDI_MIN
-#define MIDI_ON MIDI_MAX
+#define MIDI_OFF 0
+#define MIDI_ON 127
 
 // Forward declarations:
 void ccValue(byte, byte);

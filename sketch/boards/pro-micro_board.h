@@ -22,6 +22,9 @@
 // Number of Analog Input pins:
 #define AIP_NUM 4
 
+// Analog Inputs resolution (in bits):
+#define AI_RES 10
+
 /**
  * Reserved pins:
  * SERIAL_TX 0

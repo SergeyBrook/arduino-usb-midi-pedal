@@ -91,7 +91,8 @@ void initAIs() {
 		pinMode(AI_PINS[i], INPUT);
 
 		// Init Analog Input pins state:
-		AIS_STATE[i] = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
+		// Read Analog Input and scale down to MIDI message resolution.
+		AIS_STATE[i] = analogRead(AI_PINS[i]) >> (AI_RES - MIDI_RES);
 
 		// Handle state change:
 		handleAIChange(i);
@@ -127,7 +128,8 @@ void processDIs() {
  */
 void processAIs() {
 	for (int i = 0; i < AIP_NUM; i++) {
-		byte value = map(analogRead(AI_PINS[i]), 0, 1023, MIDI_MIN, MIDI_MAX);
+		// Read Analog Input and scale down to MIDI message resolution:
+		byte value = analogRead(AI_PINS[i]) >> (AI_RES - MIDI_RES);
 
 		if (AIS_STATE[i] != value) {
 			// Update state:
