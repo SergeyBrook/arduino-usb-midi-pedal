@@ -18,7 +18,7 @@ static byte AIS_STATE[AIP_NUM];
 
 // Forward declarations:
 void initEncoder(int, const uint8_t[]);
-void initDOs();
+void initLEDs();
 void initDIs();
 void initAIs();
 void processDIs();

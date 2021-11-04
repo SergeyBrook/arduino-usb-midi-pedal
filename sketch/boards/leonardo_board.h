@@ -1,7 +1,8 @@
 #pragma once
 
 /**
- * Arduino Leonardo
+ * Board: Leonardo
+ * Info: https://store-usa.arduino.cc/products/arduino-leonardo-with-headers
  */
 
 // Debug mode:
@@ -15,8 +16,6 @@
 // Number of CC Banks:
 #define CBS_NUM 4
 
-// Number of Digital Output pins:
-#define DOP_NUM 4
 // Number of Digital Input pins:
 #define DIP_NUM 4
 // Number of Analog Input pins:
@@ -25,11 +24,8 @@
 // Analog Inputs resolution (in bits):
 #define AI_RES 10
 
-/**
- * Reserved pins:
- * SERIAL_TX 0
- * SERIAL_RX 1
- */
+// `null-pin` number:
+#define NONE 255
 
 // MIDI Channel encoder pins:
 static const uint8_t CH_PINS[CHP_NUM] = {10, 11};
@@ -41,8 +37,8 @@ static const uint8_t CB_PINS[CBP_NUM] = {12, 13};
 // CC Bank to use:
 static byte CC_BANK = 0;
 
-// Digital Output pins:
-static const uint8_t DO_PINS[DOP_NUM] = {6, 7, 8, 9};
+// LED (Digital Output) pins:
+static const uint8_t LED_PINS[DIP_NUM] = {6, NONE, 7, NONE};
 
 // Digital Input pins:
 static const uint8_t DI_PINS[DIP_NUM] = {2, 3, 4, 5};

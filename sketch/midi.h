@@ -10,6 +10,7 @@
 //#include <pitchToFrequency.h>
 //#include <pitchToNote.h>
 
+
 // MIDI message resolution (in bits):
 #define MIDI_RES 7
 

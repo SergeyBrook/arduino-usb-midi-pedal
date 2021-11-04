@@ -24,8 +24,10 @@ void setup() {
 	initEncoder(CBP_NUM, CB_PINS);
 	CC_BANK += getEncoded(CBP_NUM, CB_PINS);
 
-	// Init I/O:
-	initDOs();
+	// Init LEDs:
+	initLEDs();
+
+	// Init inputs:
 	initDIs();
 	initAIs();
 }
@@ -49,15 +51,17 @@ void initEncoder(int num, const uint8_t pins[]) {
 }
 
 /**
- * Init Digital Output pins.
+ * Init LED pins.
  */
-void initDOs() {
-	for (int i = 0; i < DOP_NUM; i++) {
-		// Init Digital Output pins:
-		pinMode(DO_PINS[i], OUTPUT);
+void initLEDs() {
+	for (int i = 0; i < DIP_NUM; i++) {
+		if (LED_PINS[i] != NONE) {
+			// Init LED pin:
+			pinMode(LED_PINS[i], OUTPUT);
 
-		// Set output (LED):
-		digitalWrite(DO_PINS[i], LOW);
+			// Set initial state of LED (off):
+			digitalWrite(LED_PINS[i], LOW);
+		}
 	}
 }
 
@@ -66,11 +70,11 @@ void initDOs() {
  */
 void initDIs() {
 	for (int i = 0; i < DIP_NUM; i++) {
-		// Setup Digital Input pins Debounce:
+		// Setup Digital Input pin Debounce:
 		dis[i].attach(DI_PINS[i], INPUT_PULLUP);
 		dis[i].interval(DEBOUNCE_MSEC);
 
-		// Init Digital Input pins state:
+		// Init Digital Input pin state:
 		if (IS_LATCH[i]) {
 			DIS_STATE[i] = (digitalRead(DI_PINS[i]) == LOW);
 		} else {
@@ -148,8 +152,10 @@ void handleDIChange(int idx) {
 	// Send CC message:
 	ccState(DI_CC_BANKS[CC_BANK][idx], DIS_STATE[idx]);
 
-	// Update output (LED):
-	digitalWrite(DO_PINS[idx], DIS_STATE[idx] ? HIGH : LOW);
+	// Update LED state:
+	if (LED_PINS[idx] != NONE) {
+		digitalWrite(LED_PINS[idx], DIS_STATE[idx] ? HIGH : LOW);
+	}
 }
 
 /**
