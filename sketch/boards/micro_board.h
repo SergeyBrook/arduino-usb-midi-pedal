@@ -14,7 +14,7 @@
 // Number of CC Bank encoder pins:
 #define CBP_NUM 2
 // Number of CC Banks:
-#define CBS_NUM 4
+#define CBS_NUM (int) pow(2, CBP_NUM)
 
 // Number of Digital Input pins:
 #define DIP_NUM 4
